@@ -35,6 +35,7 @@ ClusterNodesParser::Status ClusterNodesParser::parse()
     while (mNodes.get(dat, len)) {
         int n = 0;
         bool node = false;
+        bool mSkipAddrPod = false; // 新增变量，标记 Addr 后面 pod 名称是否跳过
         while (n < len && !node) {
             char c = dat[n++];
             switch (mState) {
@@ -90,9 +91,11 @@ ClusterNodesParser::Status ClusterNodesParser::parse()
                     if (++mFieldCnt == Slot) {
                         mState = SlotBegin;
                      }
+                    mSkipAddrPod = false; // 字段结束，重置跳过标记
                 } else if (c == '\n') {
                     node = true;
                     mState = NodeStart;
+                    mSkipAddrPod = false;
                 } else {
                     switch (mFieldCnt) {
                     case NodeId:
@@ -101,8 +104,16 @@ ClusterNodesParser::Status ClusterNodesParser::parse()
                         }
                         break;
                     case Addr:
-                        if (!mAddr.append(c)) {
-                            return Error;
+                        if (mSkipAddrPod) {
+                            // 跳过 Addr 后面的 pod 名称
+                            break;
+                        }
+                        if (c == ',') {
+                            mSkipAddrPod = true; // 遇到逗号，后续字符跳过
+                        } else {
+                            if (!mAddr.append(c)) {
+                                return Error;
+                            }
                         }
                         break;
                     case Flags:

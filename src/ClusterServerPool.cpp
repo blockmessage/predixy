@@ -185,6 +185,7 @@ void ClusterServerPool::handleResponse(Handler* h, ConnectConnection* s, Request
             logDebug("redis cluster nodes update finish");
             break;
         } else {
+            // === 调试打印 cluster nodes 原始内容 ===
             logError("redis cluster nodes parse error");
             return;
         }

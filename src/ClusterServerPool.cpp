@@ -187,17 +187,6 @@ void ClusterServerPool::handleResponse(Handler* h, ConnectConnection* s, Request
         } else {
             // === 调试打印 cluster nodes 原始内容 ===
             logError("redis cluster nodes parse error");
-
-            fprintf(stderr, "=== Cluster nodes raw response begin ===\n");
-
-            const char* dat;
-            int len;
-            Segment seg = res->body(); // 拷贝一份 Segment，用 get 遍历不会修改原体
-            while (seg.get(dat, len)) {
-                fwrite(dat, 1, len, stderr);
-            }
-
-            fprintf(stderr, "\n=== Cluster nodes raw response end ===\n");
             return;
         }
     }
